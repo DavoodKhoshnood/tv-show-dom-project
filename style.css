@@ -1,6 +1,7 @@
 body {
   background-color: #e2e2e2;
 }
+
 #root {
   position: relative;
   top: 194px;
@@ -60,6 +61,7 @@ img {
 
 nav {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   position: fixed;
   top: 135px;
@@ -71,7 +73,7 @@ nav {
 
 input {
   border: none;
-  width: 140px;
+  width: 160px;
   margin-left: 8px;
 }
 
