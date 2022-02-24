@@ -1,10 +1,9 @@
 //You can edit ALL of the code here
 
-var allEpisodes = []
-
 const allShows = getAllShows().sort((a, b) =>
   a.name > b.name ? 1 : b.name > a.name ? -1 : 0,
 )
+var allEpisodes = loadEpisodeData(allShows[0].id)
 
 function setup() {
   makePageForEpisodes()
@@ -69,9 +68,17 @@ function createEpisodeBlock(episode, root) {
     '0' + episode.number
   ).slice(-2)}`
 
-  image.src = episode.image.medium
+  try {
+    image.src = episode.image.medium
+  } catch {
+    image.src = 'img/notFound.jpg'
+  }
+
   epDiv.id = 'episodeDiv'
-  epDiv.innerHTML = epDiv.innerHTML + episode.summary
+
+  if (episode.summary === null) epDiv.innerHTML += ' '
+  else epDiv.innerHTML += episode.summary
+
   epDiv.setAttribute('url', episode.url)
 
   epDiv.addEventListener('click', showEpisode)
@@ -138,11 +145,13 @@ function doSearch() {
   select.selectedIndex = 0
   searchText = document.getElementById('search').value
 
-  const epList = allEpisodes.filter(
-    (ep) =>
-      ep.name.toLowerCase().includes(searchText.toLowerCase()) ||
-      ep.summary.toLowerCase().includes(searchText.toLowerCase()),
-  )
+  const epList = allEpisodes
+    .filter((el) => el.summary != null)
+    .filter(
+      (ep) =>
+        ep.name.toLowerCase().includes(searchText.toLowerCase()) ||
+        ep.summary.toLowerCase().includes(searchText.toLowerCase()),
+    )
 
   epList.forEach((episode) => {
     createEpisodeBlock(episode, rootElem)
