@@ -1,9 +1,41 @@
+window.onload = setup
+
 //You can edit ALL of the code here
 
 const allShows = getAllShows().sort((a, b) =>
-  a.name > b.name ? 1 : b.name > a.name ? -1 : 0,
+  a.name.toLowerCase() > b.name.toLowerCase()
+    ? 1
+    : b.name.toLowerCase() > a.name.toLowerCase()
+    ? -1
+    : 0,
 )
-var allEpisodes = loadEpisodeData(allShows[0].id)
+var allEpisodes = loadEpisodeData(allShows[0].id, false)
+
+//////// Button to move up /////////
+var root = document.getElementById('root')
+var upBtn = document.createElement('button')
+root.appendChild(upBtn)
+upBtn.id = 'btnUp'
+upBtn.addEventListener('click', () => {
+  document.body.scrollTop = 0
+  document.documentElement.scrollTop = 0
+})
+upBtn.title = 'Go to top'
+upBtn.innerText = 'Top'
+window.onscroll = function () {
+  scrollFunction()
+}
+
+function scrollFunction() {
+  if (
+    document.body.scrollTop > 200 ||
+    document.documentElement.scrollTop > 200
+  ) {
+    upBtn.style.display = 'block'
+  } else {
+    upBtn.style.display = 'none'
+  }
+}
 
 function setup() {
   makePageForEpisodes()
@@ -11,14 +43,19 @@ function setup() {
 
 function makePageForEpisodes() {
   const rootElem = document.getElementById('root')
-  const header = document.createElement('header')
+  const header = document.querySelector('header')
+  const headerImg = document.createElement('img')
   const navbar = document.createElement('nav')
   const searchBox = document.createElement('input')
   const searchLabel = document.createElement('label')
   const selectEpisode = document.createElement('select')
   const selectShows = document.createElement('select')
 
-  header.innerText = 'TV Show'
+  headerImg.id = 'headerImg'
+  header.appendChild(headerImg)
+  setInterval(() => {
+    loadBannerData(headerImg)
+  }, 2000)
 
   searchBox.id = 'search'
   searchBox.type = 'text'
@@ -41,13 +78,10 @@ function makePageForEpisodes() {
   createOptionsOfShSelect(selectShows, allShows)
   searchLabel.innerText = `Displaying all episodes`
 
-  loadEpisodeData(selectShows.value)
-  setTimeout(() => {
-    allEpisodes.forEach((episode) => {
-      createEpisodeBlock(episode, rootElem)
-    })
-    createOptionsOfEpSelect(selectEpisode, allEpisodes)
-  }, 1000)
+  loadEpisodeData(selectShows.value, true)
+  // setTimeout(() => {
+
+  // }, 1000)
 
   searchBox.addEventListener('keyup', doSearch)
   selectShows.addEventListener('change', filterShows)
@@ -126,13 +160,8 @@ function filterShows(event) {
   rootElem.innerHTML = ''
   search.value = ''
   loadEpisodeData(event.target.value)
-  setTimeout(() => {
-    createOptionsOfEpSelect(selectEpisode, allEpisodes)
-    allEpisodes.forEach((episode) => {
-      createEpisodeBlock(episode, rootElem)
-    })
-    searchLabel.innerText = `Displaying all episodes`
-  }, 1000)
+  // setTimeout(() => {
+  // }, 1000)
 }
 
 ///////// Function for Search ///////////
@@ -182,11 +211,6 @@ function createOptionsOfEpSelect(select, epList) {
 
 ///////// Function To fill Shows select with options ///////////
 function createOptionsOfShSelect(select, shList) {
-  // select.innerHTML = ''
-  // let op = document.createElement('option')
-  // op.value = '0'
-  // op.innerText = 'All shows'
-  // select.appendChild(op)
   shList.forEach((sh) => {
     let op = document.createElement('option')
     op.value = sh.id
@@ -196,9 +220,56 @@ function createOptionsOfShSelect(select, shList) {
 }
 
 ///////// Fetch episodes data from tv show site ///////////
-function loadEpisodeData(episodeId) {
+function loadEpisodeData(episodeId, isFromMakePage) {
+  const rootElem = document.getElementById('root')
   fetch(`https://api.tvmaze.com/shows/${episodeId}/episodes`)
     .then((res) => res.json())
-    .then((data) => (allEpisodes = data))
+    .then((data) => {
+      if (isFromMakePage) {
+        data.forEach((episode) => {
+          createEpisodeBlock(episode, rootElem)
+        })
+        createOptionsOfEpSelect(selectEpisode, data)
+      } else {
+        createOptionsOfEpSelect(selectEpisode, data)
+        data.forEach((episode) => {
+          createEpisodeBlock(episode, rootElem)
+        })
+        searchLabel.innerText = `Displaying all episodes`
+      }
+      allEpisodes = data
+    })
 }
+
+///////// Fetch shows images data from tv show site ///////////
+function loadBannerData(headerImg) {
+  let randomNumber = Math.floor(Math.random() * allShows.length + 1)
+  if (
+    allShows.filter((sh) => sh.id === randomNumber).length == 0 &&
+    headerImg.src == ''
+  )
+    randomNumber = 1
+
+  try {
+    fetch(`https://api.tvmaze.com/shows/${randomNumber}/images`)
+      .then((res) => res.json())
+      .then((data) => {
+        let urlLink = data
+          .filter((obj) => obj.hasOwnProperty('resolutions'))
+          .filter(
+            (a) =>
+              (a.type =
+                'banner' &&
+                a.main == false &&
+                a.resolutions.original.height == 140 &&
+                a.resolutions.original.url.length > 0),
+          )
+        if (urlLink[0].resolutions.original.url.length > 0)
+          headerImg.src = urlLink[0].resolutions.original.url
+      })
+  } catch {
+    randomNumber = 1
+  }
+}
+
 window.onload = setup
