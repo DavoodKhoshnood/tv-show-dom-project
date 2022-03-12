@@ -1,100 +1,159 @@
-window.onload = setup
+let allShows = []
+let allEpisodes = []
 
-//You can edit ALL of the code here
+const divShow = document.getElementById('showContainer')
+const divEpisode = document.getElementById('episodeContainer')
+const divRoot = document.getElementById('root')
 
-const allShows = getAllShows().sort((a, b) =>
-  a.name.toLowerCase() > b.name.toLowerCase()
-    ? 1
-    : b.name.toLowerCase() > a.name.toLowerCase()
-    ? -1
-    : 0,
-)
-var allEpisodes = loadEpisodeData(allShows[0].id, false)
+const header = document.querySelector('header')
+const headerImg = document.getElementById('headerImg')
+const navbar = document.querySelector('nav')
+const selectShows = document.getElementById('selectShows')
+const selectEpisode = document.getElementById('selectEpisode')
+const searchBox = document.getElementById('search')
+const searchLabel = document.createElement('label')
+const upBtn = document.createElement('div')
+const backBtn = document.createElement('div')
 
-//////// Button to move up /////////
-var root = document.getElementById('root')
-var upBtn = document.createElement('button')
-root.appendChild(upBtn)
-upBtn.id = 'btnUp'
-upBtn.addEventListener('click', () => {
-  document.body.scrollTop = 0
-  document.documentElement.scrollTop = 0
-})
-upBtn.title = 'Go to top'
-upBtn.innerText = 'Top'
-window.onscroll = function () {
-  scrollFunction()
+//⟱⟱⟱⟱⟱⟱⟱⟱ Button to move up ⟱⟱⟱⟱⟱⟱⟱⟱
+
+topAndBackBtnCreator()
+
+function topAndBackBtnCreator() {
+  divRoot.appendChild(upBtn)
+  divRoot.appendChild(backBtn)
+
+  upBtn.id = 'btnUp'
+  upBtn.title = 'Go to top'
+  upBtn.innerText = '⟰'
+
+  backBtn.id = 'btnBack'
+  backBtn.title = 'Back to Shows'
+  backBtn.innerHTML = 'Back to Shows'
+
+  backBtn.addEventListener('click', () => {
+    setup()
+  })
+
+  upBtn.addEventListener('click', () => {
+    document.documentElement.scrollTop = 0
+  })
+
+  window.onscroll = function () {
+    scrollFunction()
+  }
+
+  function scrollFunction() {
+    if (document.documentElement.scrollTop > 200) {
+      upBtn.style.display = 'block'
+    } else {
+      upBtn.style.display = 'none'
+    }
+  }
+}
+//⟰⟰⟰⟰⟰⟰⟰⟰ Button to move up ⟰⟰⟰⟰⟰⟰⟰⟰
+
+function setup() {
+  displayChanger()
+  loadShowsData()
+  loadHeader()
 }
 
-function scrollFunction() {
-  if (
-    document.body.scrollTop > 200 ||
-    document.documentElement.scrollTop > 200
-  ) {
-    upBtn.style.display = 'block'
-  } else {
-    upBtn.style.display = 'none'
+///////// Fetch shows data from tv show site ///////////
+function loadShowsData() {
+  fetch(`https://api.tvmaze.com/shows`)
+    .then((res) => res.json())
+    .then((data) => {
+      let newData = data.sort((a, b) =>
+        a.name.toLowerCase() > b.name.toLowerCase()
+          ? 1
+          : b.name.toLowerCase() > a.name.toLowerCase()
+          ? -1
+          : 0,
+      )
+      allShows = newData
+      newData.forEach((show) => {
+        createShowBlock(show)
+      })
+      createOptionsOfShSelect()
+    })
+}
+
+function createShowBlock(show) {
+  const shDiv = document.createElement('div')
+  const title = document.createElement('h1')
+  const img = document.createElement('img')
+  const summaryDiv = document.createElement('div')
+  const details = document.createElement('div')
+
+  divShow.appendChild(shDiv)
+  shDiv.appendChild(title)
+  shDiv.appendChild(img)
+
+  shDiv.id = 'showDiv'
+  details.id = 'details'
+  let { name, summary, genres, status, rating, runtime, image } = show
+  title.innerText = name
+
+  try {
+    img.src = image.medium
+  } catch {
+    img.src = 'img/notFound.jpg'
+  }
+  let more = ''
+  if (summary.length > 400) {
+    more = ` <a id='toggleButton' href="javascript:void(0);">more... </a>`
+  }
+
+  if (show.summary === null) summaryDiv.innerHtml = ' '
+  else
+    summaryDiv.innerHTML =
+      '<p>' +
+      summary.replace(/<p>/g, '').replace(/<\/p>/g, '').substring(0, 400) +
+      '<span id="textArea">' +
+      summary.replace(/<p>/g, '').replace(/<\/p>/g, '').slice(400) +
+      '</span>' +
+      '</p>' +
+      more
+
+  details.innerHTML = `<p><b>Rate:</b> ${rating.average}<br><b>Genres:</b> ${genres}<br><b>Status:</b> ${status}<br><b>Runtime:</b> ${runtime}</p>`
+  shDiv.appendChild(summaryDiv)
+  shDiv.appendChild(details)
+  shDiv.setAttribute('showID', show.id)
+  shDiv.setAttribute('url', show.url)
+  shDiv.addEventListener('click', makePageForEpisodes)
+
+  if (more.length > 0) {
+    let tgl = document.getElementById('toggleButton')
+    tgl.addEventListener('click', toggleText)
   }
 }
 
-function setup() {
-  makePageForEpisodes()
-}
+//⟱⟱⟱⟱⟱⟱⟱⟱ Episodes ⟱⟱⟱⟱⟱⟱⟱⟱
+function makePageForEpisodes(event) {
+  if (event.target.id != 'toggleButton') {
+    let show_ID = ''
+    if (event.target.closest('#showDiv').hasAttribute('showID'))
+      show_ID = event.target.closest('#showDiv').getAttribute('showID')
 
-function makePageForEpisodes() {
-  const rootElem = document.getElementById('root')
-  const header = document.querySelector('header')
-  const headerImg = document.createElement('img')
-  const navbar = document.createElement('nav')
-  const searchBox = document.createElement('input')
-  const searchLabel = document.createElement('label')
-  const selectEpisode = document.createElement('select')
-  const selectShows = document.createElement('select')
+    displayChanger(false)
 
-  headerImg.id = 'headerImg'
-  header.appendChild(headerImg)
-  setInterval(() => {
-    loadBannerData(headerImg)
-  }, 2000)
+    selectShows.value = show_ID
 
-  searchBox.id = 'search'
-  searchBox.type = 'text'
-  searchBox.placeholder = 'Search'
-  searchBox.autocomplete = 'off'
+    loadEpisodeData(show_ID)
 
-  searchLabel.for = 'search'
-  searchLabel.id = 'searchLabel'
-
-  selectEpisode.id = 'selectEpisode'
-  selectShows.id = 'selectShows'
-
-  document.body.appendChild(header)
-  header.appendChild(navbar)
-  navbar.appendChild(selectShows)
-  navbar.appendChild(selectEpisode)
-  navbar.appendChild(searchBox)
-  navbar.appendChild(searchLabel)
-
-  createOptionsOfShSelect(selectShows, allShows)
-  searchLabel.innerText = `Displaying all episodes`
-
-  loadEpisodeData(selectShows.value, true)
-  // setTimeout(() => {
-
-  // }, 1000)
-
-  searchBox.addEventListener('keyup', doSearch)
-  selectShows.addEventListener('change', filterShows)
-  selectEpisode.addEventListener('change', filterEpisode)
+    selectShows.addEventListener('change', filterShows)
+    selectEpisode.addEventListener('change', filterEpisode)
+  }
 }
 
 ////////// Create each episode block ///////////////
-function createEpisodeBlock(episode, root) {
+function createEpisodeBlock(episode) {
   const epDiv = document.createElement('div')
   const title = document.createElement('h3')
   const image = document.createElement('img')
 
-  root.appendChild(epDiv)
+  divEpisode.appendChild(epDiv)
   epDiv.appendChild(title)
   epDiv.appendChild(image)
 
@@ -114,7 +173,6 @@ function createEpisodeBlock(episode, root) {
   else epDiv.innerHTML += episode.summary
 
   epDiv.setAttribute('url', episode.url)
-
   epDiv.addEventListener('click', showEpisode)
 }
 
@@ -124,18 +182,15 @@ function showEpisode(event) {
   let urlLink = ''
 
   if (element.hasAttribute('url')) urlLink = element.getAttribute('url')
-  else urlLink = element.parentNode.getAttribute('url')
+  else if (element.parentNode.hasAttribute('url'))
+    urlLink = element.parentNode.getAttribute('url')
 
   window.open(urlLink)
 }
 
 ///////// Function for select Episode ///////////
 function filterEpisode(event) {
-  const rootElem = document.getElementById('root')
-  const search = document.getElementById('search')
-  const searchLabel = document.getElementById('searchLabel')
-
-  rootElem.innerHTML = ''
+  divEpisode.innerHTML = ''
   search.value = ''
   const epList =
     event.target.value == 0
@@ -143,7 +198,7 @@ function filterEpisode(event) {
       : allEpisodes.filter((ep) => ep.id == event.target.value)
 
   epList.forEach((episode) => {
-    createEpisodeBlock(episode, rootElem)
+    createEpisodeBlock(episode)
   })
   searchLabel.innerText =
     allEpisodes.length === epList.length
@@ -153,103 +208,102 @@ function filterEpisode(event) {
 
 ///////// Function for select Show ///////////
 function filterShows(event) {
-  const rootElem = document.getElementById('root')
-  const search = document.getElementById('search')
-  const searchLabel = document.getElementById('searchLabel')
-
-  rootElem.innerHTML = ''
+  divShow.innerHTML = ''
   search.value = ''
   loadEpisodeData(event.target.value)
-  // setTimeout(() => {
-  // }, 1000)
 }
 
 ///////// Function for Search ///////////
 function doSearch() {
-  const rootElem = document.getElementById('root')
-  const searchLabel = document.getElementById('searchLabel')
-  const select = document.getElementById('selectEpisode')
-
-  rootElem.innerHTML = ''
-  select.selectedIndex = 0
+  divEpisode.innerHTML = ''
+  selectEpisode.selectedIndex = 0
   searchText = document.getElementById('search').value
 
-  const epList = allEpisodes
-    .filter((el) => el.summary != null)
-    .filter(
-      (ep) =>
-        ep.name.toLowerCase().includes(searchText.toLowerCase()) ||
-        ep.summary.toLowerCase().includes(searchText.toLowerCase()),
-    )
+  if (divShow.style.display != 'none') {
+    divShow.innerHTML = ''
+    const shList = allShows
+      .filter((el) => el.summary != null)
+      .filter(
+        (sh) =>
+          sh.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          sh.summary.toLowerCase().includes(searchText.toLowerCase()),
+      )
 
-  epList.forEach((episode) => {
-    createEpisodeBlock(episode, rootElem)
-  })
+    shList.forEach((show) => {
+      createShowBlock(show)
+    })
 
-  searchLabel.innerText =
-    allEpisodes.length === epList.length
-      ? `Displaying all episodes`
-      : `Displaying ${epList.length}/${allEpisodes.length} episode(s)`
+    searchLabel.innerText =
+      allShows.length === shList.length
+        ? `Displaying all shows`
+        : `Displaying ${shList.length}/${allShows.length} show(s)`
+  } else {
+    const epList = allEpisodes
+      .filter((el) => el.summary != null)
+      .filter(
+        (ep) =>
+          ep.name.toLowerCase().includes(searchText.toLowerCase()) ||
+          ep.summary.toLowerCase().includes(searchText.toLowerCase()),
+      )
+
+    epList.forEach((episode) => {
+      createEpisodeBlock(episode)
+    })
+
+    searchLabel.innerText =
+      allEpisodes.length === epList.length
+        ? `Displaying all episodes`
+        : `Displaying ${epList.length}/${allEpisodes.length} episode(s)`
+  }
 }
 
 ///////// Function To fill Episodes select with options ///////////
-function createOptionsOfEpSelect(select, epList) {
-  select.innerHTML = ''
+function createOptionsOfEpSelect() {
+  selectEpisode.innerHTML = ''
   let op = document.createElement('option')
   op.value = '0'
   op.innerText = 'All episodes'
-  select.appendChild(op)
-  epList.forEach((ep) => {
+  selectEpisode.appendChild(op)
+  allEpisodes.forEach((ep) => {
     let op = document.createElement('option')
     op.value = ep.id
     op.innerText = `S${('0' + ep.season).slice(-2)}${('0' + ep.number).slice(
       -2,
     )} - ${ep.name}`
-    select.appendChild(op)
+    selectEpisode.appendChild(op)
   })
 }
 
 ///////// Function To fill Shows select with options ///////////
-function createOptionsOfShSelect(select, shList) {
-  shList.forEach((sh) => {
+function createOptionsOfShSelect() {
+  allShows.forEach((sh) => {
     let op = document.createElement('option')
     op.value = sh.id
+    op.id = sh.id
     op.innerText = sh.name
-    select.appendChild(op)
+    selectShows.appendChild(op)
   })
 }
 
 ///////// Fetch episodes data from tv show site ///////////
-function loadEpisodeData(episodeId, isFromMakePage) {
-  const rootElem = document.getElementById('root')
+function loadEpisodeData(episodeId) {
+  divEpisode.innerHTML = ''
   fetch(`https://api.tvmaze.com/shows/${episodeId}/episodes`)
     .then((res) => res.json())
     .then((data) => {
-      if (isFromMakePage) {
-        data.forEach((episode) => {
-          createEpisodeBlock(episode, rootElem)
-        })
-        createOptionsOfEpSelect(selectEpisode, data)
-      } else {
-        createOptionsOfEpSelect(selectEpisode, data)
-        data.forEach((episode) => {
-          createEpisodeBlock(episode, rootElem)
-        })
-        searchLabel.innerText = `Displaying all episodes`
-      }
+      data.forEach((episode) => {
+        createEpisodeBlock(episode)
+      })
+      searchLabel.innerText = `Displaying all episodes`
       allEpisodes = data
+      createOptionsOfEpSelect()
     })
 }
 
 ///////// Fetch shows images data from tv show site ///////////
-function loadBannerData(headerImg) {
-  let randomNumber = Math.floor(Math.random() * allShows.length + 1)
-  if (
-    allShows.filter((sh) => sh.id === randomNumber).length == 0 &&
-    headerImg.src == ''
-  )
-    randomNumber = 1
-
+function loadBannerData() {
+  var item = allShows[Math.floor(Math.random() * allShows.length)]
+  let randomNumber = item.id
   try {
     fetch(`https://api.tvmaze.com/shows/${randomNumber}/images`)
       .then((res) => res.json())
@@ -268,8 +322,42 @@ function loadBannerData(headerImg) {
           headerImg.src = urlLink[0].resolutions.original.url
       })
   } catch {
-    randomNumber = 1
+    randomNumber = 124
   }
 }
 
+function loadHeader() {
+  setInterval(() => {
+    loadBannerData()
+  }, 3000)
+
+  searchBox.addEventListener('keyup', doSearch)
+  searchLabel.innerText = `Displaying all episodes`
+}
+
+function displayChanger(isShowsOn = true) {
+  searchBox.value = ''
+  divShow.style.display = isShowsOn ? 'block' : 'none'
+  divEpisode.style.display = isShowsOn ? 'none' : 'flex'
+  backBtn.style.display = isShowsOn ? 'none' : 'block'
+  selectEpisode.style.display = isShowsOn ? 'none' : 'block'
+  selectShows.style.display = isShowsOn ? 'none' : 'block'
+}
+
+let status = 'less'
+
+function toggleText(event) {
+  // let text = 'Here is some text that I want added to the HTML file'
+  if (status == 'less') {
+    document.getElementById('textArea').style.display = 'block'
+    // document.getElementById('textArea').innerHTML += text
+    document.getElementById('toggleButton').innerText = 'See Less'
+    status = 'more'
+  } else if (status == 'more') {
+    document.getElementById('textArea').style.display = 'none'
+    // document.getElementById('textArea').innerHTML = ''
+    document.getElementById('toggleButton').innerText = 'See More'
+    status = 'less'
+  }
+}
 window.onload = setup

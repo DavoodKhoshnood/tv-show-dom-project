@@ -9,8 +9,27 @@
   </head>
 
   <body>
-    <header></header>
-    <div id="root"></div>
+    <header>
+      <img
+        id="headerImg"
+        src="https://static.tvmaze.com/uploads/images/original_untouched/290/726482.jpg"
+      />
+      <nav>
+        <select id="selectShows"></select>
+        <select id="selectEpisode"></select>
+        <input
+          id="search"
+          type="text"
+          placeholder="Search"
+          autocomplete="off"
+        />
+        <label id="searchLabel" for="search"></label>
+      </nav>
+    </header>
+    <div id="root">
+      <div id="showContainer"></div>
+      <div id="episodeContainer"></div>
+    </div>
 
     <!-- Loads a provided function called getAllEpisodes() which returns all episodes -->
     <script src="episodes.js"></script>
@@ -19,4 +38,10 @@
     <!-- Loads YOUR javascript code -->
     <script src="script.js"></script>
   </body>
+  <footer>
+    <div>
+      The data has (originally) come from
+      <a href="https://www.TVMaze.com">TVMaze.com</a>
+    </div>
+  </footer>
 </html>
