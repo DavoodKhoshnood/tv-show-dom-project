@@ -46,8 +46,10 @@ function topAndBackBtnCreator() {
   function scrollFunction() {
     if (document.documentElement.scrollTop > 200) {
       upBtn.style.display = 'block'
+      headerImg.height = 0
     } else {
       upBtn.style.display = 'none'
+      headerImg.height = 250
     }
   }
 }
@@ -336,6 +338,7 @@ function loadHeader() {
 }
 
 function displayChanger(isShowsOn = true) {
+  document.documentElement.scrollTop = 0
   searchBox.value = ''
   divShow.style.display = isShowsOn ? 'block' : 'none'
   divEpisode.style.display = isShowsOn ? 'none' : 'flex'

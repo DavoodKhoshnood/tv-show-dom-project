@@ -24,7 +24,7 @@ body {
 }
 
 header {
-  position: fixed;
+  position: relative;
   top: 0;
   z-index: 1;
   width: 100%;
@@ -49,7 +49,7 @@ nav {
   align-items: center;
   justify-content: center;
   color: #fff;
-  position: fixed;
+  position: relative;
   width: 100%;
   background-color: #4c4c4c;
   margin-top: -6px;
@@ -194,12 +194,6 @@ select {
 }
 
 @media (min-width: 1080px) {
-  #episodeContainer {
-    margin-top: 22%;
-  }
-  #showContainer {
-    margin-top: 430px;
-  }
   nav {
     height: 64px;
   }
@@ -211,13 +205,6 @@ select {
   }
 }
 @media (max-width: 1079px) and (min-width: 741px) {
-  #episodeContainer {
-    margin-top: 25%;
-  }
-  #showContainer {
-    margin-top: 270px;
-  }
-
   nav {
     height: 64px;
   }
@@ -230,9 +217,6 @@ select {
 }
 
 @media (max-width: 740px) {
-  #episodeContainer {
-    margin-top: 72%;
-  }
   nav {
     height: 200px;
     flex-direction: column;
