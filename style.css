@@ -62,6 +62,7 @@ h3 {
   margin: 0;
   padding: 20px 0;
   width: 100%;
+  border-radius: 10px 10px 0 0;
 }
 
 p {
@@ -78,6 +79,7 @@ img {
   display: none;
   background-color: #fff;
   border: none;
+  border-radius: 10px;
   box-shadow: 10px 10px 20px #999;
   width: 360px;
   margin: 28px;
@@ -89,8 +91,9 @@ img {
 
 input {
   border: none;
-  margin-left: 8px;
+  margin-left: 10px;
   padding: 15px 4px;
+  border-radius: 5px;
 }
 
 label {
@@ -102,8 +105,9 @@ label {
 select {
   border: none;
   font-size: 14px;
-  margin-left: 8px;
+  margin-left: 10px;
   padding: 14px 4px;
+  border-radius: 5px;
 }
 
 #btnUp {
@@ -150,6 +154,7 @@ select {
   display: grid;
   grid-template-columns: 12% auto 30%;
   width: 94%;
+  border-radius: 10px;
   background-color: #ffffff;
   padding: 20px;
   margin: 20px;
@@ -168,6 +173,7 @@ select {
 #showDiv img {
   width: 100%;
   margin-right: 15px;
+  border-radius: 5px;
 }
 
 #details {
@@ -198,7 +204,7 @@ select {
     height: 64px;
   }
   input {
-    width: 160px;
+    width: 50%;
   }
   select {
     width: 20%;

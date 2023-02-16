@@ -12,7 +12,7 @@ const selectShows = document.getElementById('selectShows')
 const selectEpisode = document.getElementById('selectEpisode')
 const searchBox = document.getElementById('search')
 const searchLabel = document.createElement('label')
-const upBtn = document.createElement('div')
+const upBtn = document.getElementById('btnUp')
 const backBtn = document.createElement('div')
 
 //⟱⟱⟱⟱⟱⟱⟱⟱ Button to move up ⟱⟱⟱⟱⟱⟱⟱⟱
@@ -20,12 +20,7 @@ const backBtn = document.createElement('div')
 topAndBackBtnCreator()
 
 function topAndBackBtnCreator() {
-  divRoot.appendChild(upBtn)
   divRoot.appendChild(backBtn)
-
-  upBtn.id = 'btnUp'
-  upBtn.title = 'Go to top'
-  upBtn.innerText = '⟰'
 
   backBtn.id = 'btnBack'
   backBtn.title = 'Back to Shows'
@@ -35,21 +30,15 @@ function topAndBackBtnCreator() {
     setup()
   })
 
-  upBtn.addEventListener('click', () => {
-    document.documentElement.scrollTop = 0
-  })
-
   window.onscroll = function () {
     scrollFunction()
   }
 
   function scrollFunction() {
-    if (document.documentElement.scrollTop > 200) {
+    if (document.documentElement.scrollTop > 300) {
       upBtn.style.display = 'block'
-      headerImg.height = 0
     } else {
       upBtn.style.display = 'none'
-      headerImg.height = 250
     }
   }
 }
@@ -340,7 +329,7 @@ function loadHeader() {
 function displayChanger(isShowsOn = true) {
   document.documentElement.scrollTop = 0
   searchBox.value = ''
-  divShow.style.display = isShowsOn ? 'block' : 'none'
+  divShow.style.display = isShowsOn ? 'flex' : 'none'
   divEpisode.style.display = isShowsOn ? 'none' : 'flex'
   backBtn.style.display = isShowsOn ? 'none' : 'block'
   selectEpisode.style.display = isShowsOn ? 'none' : 'block'
